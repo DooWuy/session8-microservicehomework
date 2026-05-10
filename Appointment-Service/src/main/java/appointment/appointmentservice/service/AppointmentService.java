@@ -2,6 +2,7 @@ package appointment.appointmentservice.service;
 
 import appointment.appointmentservice.dto.ApiResponseError;
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
+import io.github.resilience4j.retry.annotation.Retry;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -33,4 +34,25 @@ public class AppointmentService {
 
         return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(error);
     }
+
+    @Retry(name = "patientRetry", fallbackMethod = "getPatientFallback")
+    public ResponseEntity<?> getPatientInfo(Long patientId) {
+        String url = "http://localhost:8081/patients/" + patientId;
+
+        Object patient = restTemplate.getForObject(url, Object.class);
+
+        return ResponseEntity.ok(patient);
+    }
+
+    public ResponseEntity<ApiResponseError> getPatientFallback(Long patientId, Exception e) {
+        ApiResponseError error = new ApiResponseError(
+                503,
+                "khong the kt infor patent , moi thu lai sau "
+        );
+
+        return ResponseEntity
+                .status(HttpStatus.SERVICE_UNAVAILABLE)
+                .body(error);
+    }
+
 }

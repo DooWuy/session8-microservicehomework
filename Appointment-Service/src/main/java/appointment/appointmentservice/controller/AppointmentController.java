@@ -21,6 +21,12 @@ public class AppointmentController {
     }
 
 
+    @GetMapping("/patient/{patientId}")
+    public ResponseEntity<?> getPatientInfo(@PathVariable Long patientId) {
+        return appointmentService.getPatientInfo(patientId);
+    }
+
+
 
 
 }
